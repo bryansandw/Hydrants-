@@ -1,0 +1,2 @@
+Date	Flow Hydrant	Pilot Reading	Pitot Reading	Static	Static Hydrant	Residuals	Static_2	Grease1	Paint1	Type	Height	Manufacture Date
+7/14/2015	O09-834-fh	1235	1566	522	O09-001-FH	1600	768	Yes	Yes	Clow	22	1999
