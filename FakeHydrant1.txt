@@ -1,0 +1,2 @@
+Date	Flow Hydrant	Pilot Reading	Pitot Reading	Static	Static Hydrant	Residuals	Static_2	Grease1	Paint1	Type	Height	Manufacture Date
+7/14/2015	Q12-002-FH	1000	1213	132				Off	Off			
