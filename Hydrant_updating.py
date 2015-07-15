@@ -21,25 +21,37 @@ for infile in glob.glob( os.path.join(path, '*.txt') ):
         txt_files.append(infile)   
 #print txt_files # to check that they were all in the list
 
-
+# Hydro_list will be a list of the hydrants sored as lists, this will allow the information to be accessed by the surch cursor later
 hydro_list = []
+# The label_list will contain all of the hydrant labels that are in hydro_list, this will allow the code to correctly identify the index of the hydrant
 label_list = []
+# list1 is the same as the header information, it isn't really nessisary, but without it helps keep the indexing in order
 list1 = ['Date','Flow Hydrant','Pilot Reading','Pitot Reading','Static','Static Hydrant','Residuals','Static_2','Grease1','Paint1','Type','Height','Manufacture Date']
 hydro_list.append(list1)
+# item is index 1, which is the 'Flow Hydrant' which is the same as the hydrant Label
 item = list1[1]
 label_list.append(item)
 
+# 
 for txt in txt_files:
     with open(txt, 'r') as f:
         next(f)
-        for line in f:    
-            str = line
+        for str in f:    
             print str
             out1.write(str)
             list = str.split('\t')
             hydro_list.append(list)
-            label_list.append(list[1])
-			# could create lists with the information in it? ehh 
+            # The labels sould be in A##-###-AA format
+            hydro_label = list[1]
+            if len(hydro_label) > 10:
+                continue
+            elif len(hydro_label) > 7:
+                label_list.append(hydro_label.upper())
+            elif len(hydro_label) == 7:
+                hydro_label = hydro_label.upper() + "-FH"
+                label_list.append(hydro_label)
+            else:
+                continue
 out1.close()
 
 #################################################################################################
@@ -59,7 +71,7 @@ for hydrant in hydrants:
         
         # Defining the hydrant values that will be used to update the shapefile 
         # need to check if they have null values or are wrong data type
-        hydrant.FLOW_DATE = hydro_list[index][0]
+        hydrant.FLOW_DATE = hydro_list[index][0] #Should never be null, self fills 
         hydrant.PITOT_PSI = hydro_list[index][2]
         hydrant.PITOT_GPM = hydro_list[index][3]
         hydrant.STATIC_PSI = hydro_list[index][4]
