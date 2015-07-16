@@ -25,7 +25,7 @@ for infile in glob.glob( os.path.join(path, '*.txt') ):
 hydro_list = []
 # The label_list will contain all of the hydrant labels that are in hydro_list, this will allow the code to correctly identify the index of the hydrant
 label_list = []
-# list1 is the same as the header information, it isn't really nessisary, but without it helps keep the indexing in order
+# list1 is the same as the header information, it isn't really nessisary, but it helps keep the indexing in order
 list1 = ['Date','Flow Hydrant','Pilot Reading','Pitot Reading','Static','Static Hydrant','Residuals','Static_2','Grease1','Paint1','Type','Height','Manufacture Date']
 hydro_list.append(list1)
 # item is index 1, which is the 'Flow Hydrant' which is the same as the hydrant Label
@@ -54,13 +54,15 @@ for txt in txt_files:
                 continue
 out1.close()
 
+# May want some kind of out put that tell the user how many of the pdfs were greater than 10 or in the else category 
+
 #################################################################################################
-# This is where the ShapeFile will be proccessed with the data that was collected from the PDFs #
+# This is where the ShapeFile will be processed with the data that was collected from the PDFs  #
 #################################################################################################
 
 import arcpy 
 
-hydrants = arcpy.UpdateCursor('Hydrant_Copy')  # path to hydrants shapefile to be updated
+hydrants = arcpy.UpdateCursor('Hydrant_Copy', ["LABEL", "FLOW_DATE", "PITOT_PSI", "PITOT_GPM", "PITOT_GPM", "STATIC_HYD", "RESID_PSI", "ST_HYD_PSI", "Greased", "Painted"])  # path to hydrants to be updated
 
 # iterate through the features in the shapefile looking for hydrants that in the pdfs
 for hydrant in hydrants:
@@ -71,13 +73,49 @@ for hydrant in hydrants:
         
         # Defining the hydrant values that will be used to update the shapefile 
         # need to check if they have null values or are wrong data type
-        hydrant.FLOW_DATE = hydro_list[index][0] #Should never be null, self fills 
-        hydrant.PITOT_PSI = hydro_list[index][2]
-        hydrant.PITOT_GPM = hydro_list[index][3]
-        hydrant.STATIC_PSI = hydro_list[index][4]
-        hydrant.STATIC_HYD = hydro_list[index][5]
-        hydrant.RESID_PSI = hydro_list[index][6]
-        hydrant.ST_HYD_PSI = hydro_list[index][7]
+        
+        
+        
+        if hydro_list[index][2] != '':
+            hydrant.PITOT_PSI = hydro_list[index][2]
+        else:
+            pass
+        
+        if hydro_list[index][3] != '':
+            hydrant.PITOT_GPM = hydro_list[index][3]
+            hydrant.FLOW_DATE = hydro_list[index][0]      # Should only update Flow date if hydrant is flowed...	
+        else:
+            pass
+        
+        if hydro_list[index][4] != '':
+            hydrant.STATIC_PSI = hydro_list[index][4]
+        else:
+            pass
+        
+        if hydro_list[index][5] != '':
+            shydro_label = hydro_list[index][5]
+            if len(shydro_label) > 10:
+                continue
+            elif len(shydro_label) > 7:
+                hydrant.STATIC_HYD = shydro_label.upper()
+            elif len(shydro_label) == 7:
+                shydro_label = shydro_label.upper() + "-FH"
+                hydrant.STATIC_HYD = shydro_label
+            else:
+                continue
+            #hydrant.STATIC_HYD = hydro_list[index][5]
+        else:
+            pass
+        
+        if hydro_list[index][6] != '':
+            hydrant.RESID_PSI = hydro_list[index][6]
+        else:
+            pass
+        
+        if hydro_list[index][7] != '':
+            hydrant.ST_HYD_PSI = hydro_list[index][7]
+        else:
+            pass
         
         # not to update shapefile
         #Greased = hydro_list[index][8] 
@@ -100,7 +138,7 @@ for hydrant in hydrants:
         Manuf_Date = hydro_list[index][12]
 
 		
-        print "date: " + hydrant.FLOW_DATE + "    PSI: " + hydrant.PITOT_PSI + "    GPM: " + hydrant.PITOT_GPM + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
+        #print "date: " + hydrant.FLOW_DATE + "    PSI: " + hydrant.PITOT_PSI + "    GPM: " + hydrant.PITOT_GPM + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
         hydrants.updateRow(hydrant)
     else:
         continue
