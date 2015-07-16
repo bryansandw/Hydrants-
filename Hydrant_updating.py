@@ -1,18 +1,22 @@
 #################################################################################################################################
 # Name: Elizabeth Rentschlar                                                                                                    #
 # Purpose:                                                                                                                      #
-# Created: 7/10/15                                                                                                              #
+# Created: 7/15/15                                                                                                              #
 # Copyright: (c) City of Bryan                                                                                                  #
 # ArcGIS Version: 10.2.2                                                                                                        #
 # Python Version: 2.7                                                                                                           #
 #################################################################################################################################
 
 # This is the folder that the hydrant pdfs that were converted to txt are located in
-folder = r'C:\Users\erentschlar\Desktop\FakeHydrants'
+folder = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\FakeHydrants'
+
+# The hydrant shapfile's location, or just name when it is open in the map.  
+# when using the python window in ArcMap you can drag the file into this location
+hydrant_shp = 'Hydrant_Copy'
 
 # file that the hydrant outputs is being written into 
 # currently appending the existing file this is intended to be a record of what hydrants have been processed
-out = r'C:\Users\erentschlar\Desktop\Hydrants.txt'
+out = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\Hydrants.txt'
 out1 = open(out, 'a')
 
 # These could be used if you would like to create a new file or overwrite an old file instead of appending to an existing file
@@ -71,7 +75,7 @@ out1.close()
 
 import arcpy 
 
-hydrants = arcpy.UpdateCursor('Hydrant_Copy', ["LABEL", "FLOW_DATE", "PITOT_PSI", "PITOT_GPM", "PITOT_GPM", "STATIC_HYD", "RESID_PSI", "ST_HYD_PSI", "Greased", "Painted"])  # path to hydrants to be updated
+hydrants = arcpy.UpdateCursor(hydrant_shp, ["LABEL", "FLOW_DATE", "PITOT_PSI", "PITOT_GPM", "PITOT_GPM", "STATIC_HYD", "RESID_PSI", "ST_HYD_PSI", "Greased", "Painted"])  # path to hydrants to be updated
 
 # iterate through the features in the shapefile looking for hydrants that in the pdfs
 for hydrant in hydrants:
@@ -140,13 +144,11 @@ for hydrant in hydrants:
         else:
             pass
 		
-        
         # probably wont use these since they are only for new hydrants... what to do with new... 
         Model = hydro_list[index][10]
         HGHT = hydro_list[index][11]
         Manuf_Date = hydro_list[index][12]
 
-		
         #print "date: " + hydrant.FLOW_DATE + "    PSI: " + hydrant.PITOT_PSI + "    GPM: " + hydrant.PITOT_GPM + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
         hydrants.updateRow(hydrant)
     else:
