@@ -19,6 +19,10 @@ hydrant_shp = 'Hydrant_Copy'
 out = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\Hydrants.txt'
 out1 = open(out, 'a')
 
+# These are the pdfs that will not be used for updating the shapefile
+no_go = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\Look_at_these_PDFs.txt'
+no_go1 = open(no_go, 'a')
+
 # These could be used if you would like to create a new file or overwrite an old file instead of appending to an existing file
 # header = 'Date	Flow Hydrant	Pilot Reading	Pitot Reading	Static	Static Hydrant	Residuals	Static_2	Grease1	Paint1	Type	Height	Manufacture Date \n'
 # out1.write(header)
@@ -54,18 +58,19 @@ for txt in txt_files:
             out1.write(str)
             list = str.split('\t')
             hydro_list.append(list)
-            # The labels sould be in A##-###-AA format
+            # The labels should be in A##-###-AA format
             hydro_label = list[1]
             if len(hydro_label) > 10:
-                continue
+                no_go1.write(txt + '\n') #continue # need a files not processed txt file 
             elif len(hydro_label) > 7:
                 label_list.append(hydro_label.upper())
             elif len(hydro_label) == 7:
                 hydro_label = hydro_label.upper() + "-FH"
                 label_list.append(hydro_label)
             else:
-                continue
+                no_go1.write(txt+ '\n') #continue # need a files not processed txt file 
 out1.close()
+no_go1.close()
 
 # May want some kind of out put that tell the user how many of the pdfs were greater than 10 or in the else category 
 
