@@ -60,7 +60,7 @@ out1.close()
 # Function checkNULL makes sure that there was data in the pdf before trying to use the data to update the shapefile attribute  #
 #################################################################################################################################
 
-#does not work, the hydrant oject names are being brought in as variables need to figure out how to define them as object names...
+#does not work, the hydrant oject names are being brought in as variables 
 def checkNULL(attribute, info):
     if info != '':
         #print attribute + info
@@ -68,6 +68,19 @@ def checkNULL(attribute, info):
     else:
         pass
 
+
+########################################################################################
+# Function checkDATE to update the shapefile attribute with dates if process occurred  #
+########################################################################################
+
+def checkDate(attribute, info, date):
+    if info != '':
+        if info != 'Off':
+            attribute = date
+        else:
+            pass        
+    else:
+        pass
 #################################################################################################
 # This is where the ShapeFile will be processed with the data that was collected from the PDFs  #
 #################################################################################################
@@ -80,7 +93,6 @@ for hydrant in hydrants:
         # print index # to check that the index was correct
         #print "date: " + str(hydrant.FLOW_DATE) + "    PSI: " + str(hydrant.PITOT_PSI) + "    GPM: " + str(hydrant.PITOT_GPM) + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
 		# Defining the hydrant values that will be used to update the shapefile
-        checkNULL(hydrant.FLOW_DATE , hydro_list[index][0])
         checkNULL(hydrant.PITOT_PSI , hydro_list[index][2])
         checkNULL(hydrant.PITOT_GPM , hydro_list[index][3])
         checkNULL(hydrant.PITOT_GPM , hydro_list[index][4])
@@ -88,26 +100,19 @@ for hydrant in hydrants:
         checkNULL(hydrant.RESID_PSI , hydro_list[index][6])
         checkNULL(hydrant.ST_HYD_PSI , hydro_list[index][7])
         
-		# not to update shapefile
+	# not to update shapefile
         #Greased = hydro_list[index][8] 
         #Painted = hydro_list[index][9]
 		
         # for updating shapefile
-        if hydro_list[index][8] == 'Yes':
-            hydrant.Greased = hydro_list[index][0]
-        else:
-            pass
-        if hydro_list[index][9] == 'Yes':
-            hydrant.Painted = hydro_list[index][0]
-        else:
-            pass
-		
+        checkDate(hydrant.FLOW_DATE , hydro_list[index][3] , hydro_list[index][0]) # this is checking if the hydrant was flowed 
+        checkDate(hydrant.Greased , hydro_list[index][8] , hydro_list[index][0])   # this is checking if the hydrant was greased		
+        checkDate(hydrant.Painted , hydro_list[index][9] , hydro_list[index][0])   # this is checking if the hydrant was painted
         
         # probably wont use these since they are only for new hydrants... what to do with new... 
-        Model = hydro_list[index][10]
-        HGHT = hydro_list[index][11]
-        Manuf_Date = hydro_list[index][12]
-
+        #Model = hydro_list[index][10]
+        #HGHT = hydro_list[index][11]
+        #Manuf_Date = hydro_list[index][12]
 		
         #print "date: " + hydrant.FLOW_DATE + "    PSI: " + hydrant.PITOT_PSI + "    GPM: " + hydrant.PITOT_GPM + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
         hydrants.updateRow(hydrant)
