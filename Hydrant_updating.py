@@ -93,6 +93,8 @@ def checkDate(attribute, info, date):
 #################################################################################################
 # This is where the ShapeFile will be processed with the data that was collected from the PDFs  #
 #################################################################################################
+import arcpy 
+
 hydrants = arcpy.UpdateCursor('Hydrant_Copy', ["LABEL", "FLOW_DATE", "PITOT_PSI", "PITOT_GPM", "PITOT_GPM", "STATIC_HYD", "RESID_PSI", "ST_HYD_PSI", "Greased", "Painted"])  # path to hydrants to be updated
 
 for hydrant in hydrants:
