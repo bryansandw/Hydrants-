@@ -6,14 +6,23 @@
 # ArcGIS Version: 10.2.2                                                                                                        #
 # Python Version: 2.7                                                                                                           #
 #################################################################################################################################
+import arcpy 
 
 # This is the folder that the hydrant pdfs that were converted to txt are located in
-folder = r'C:\Users\erentschlar\Desktop\FakeHydrants'
+folder = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\FakeHydrants'
+
+# The hydrant shapfile's location, or just name when it is open in the map.  
+# when using the python window in ArcMap you can drag the file into this location
+hydrant_shp = 'Hydrant_Copy'
 
 # file that the hydrant outputs is being written into 
 # currently appending the existing file this is intended to be a record of what hydrants have been processed
-out = r'C:\Users\erentschlar\Desktop\Hydrants.txt'
+out = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\Hydrants.txt'
 out1 = open(out, 'a')
+
+# These are the pdfs that will not be used for updating the shapefile
+no_go = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\Look_at_these_PDFs.txt'
+no_go1 = open(no_go, 'a')
 
 # These could be used if you would like to create a new file or overwrite an old file instead of appending to an existing file
 # header = 'Date	Flow Hydrant	Pilot Reading	Pitot Reading	Static	Static Hydrant	Residuals	Static_2	Grease1	Paint1	Type	Height	Manufacture Date \n'
@@ -34,7 +43,7 @@ for infile in glob.glob( os.path.join(path, '*.txt') ):
 hydro_list = []
 # The label_list will contain all of the hydrant labels that are in hydro_list, this will allow the code to correctly identify the index of the hydrant
 label_list = []
-# list1 is the same as the header information, it isn't really nessisary, but without it helps keep the indexing in order
+# list1 is the same as the header information, it isn't really nessisary, but it helps keep the indexing in order
 list1 = ['Date','Flow Hydrant','Pilot Reading','Pitot Reading','Static','Static Hydrant','Residuals','Static_2','Grease1','Paint1','Type','Height','Manufacture Date']
 hydro_list.append(list1)
 # item is index 1, which is the 'Flow Hydrant' which is the same as the hydrant Label
@@ -46,22 +55,23 @@ for txt in txt_files:
     with open(txt, 'r') as f:
         next(f)
         for str in f:    
-            print str
+            #print str
             out1.write(str)
             list = str.split('\t')
             hydro_list.append(list)
-            # The labels sould be in A##-###-AA format
+            # The labels should be in A##-###-AA format
             hydro_label = list[1]
             if len(hydro_label) > 10:
-                continue
+                no_go1.write(txt + '\n') #continue # need a files not processed txt file 
             elif len(hydro_label) > 7:
                 label_list.append(hydro_label.upper())
             elif len(hydro_label) == 7:
                 hydro_label = hydro_label.upper() + "-FH"
                 label_list.append(hydro_label)
             else:
-                continue
+                no_go1.write(txt+ '\n') #continue # need a files not processed txt file 
 out1.close()
+no_go1.close()
 
 # May want some kind of out put that tell the user how many of the pdfs were greater than 10 or in the else category 
 
@@ -69,7 +79,7 @@ out1.close()
 # Function checkNULL makes sure that there was data in the pdf before trying to use the data to update the shapefile attribute  #
 #################################################################################################################################
 
-#does not work, the hydrant oject names are being brought in as variables 
+#does not work, the class hydrant's attribute names are being brought in as variables and not as class 
 def checkNULL(attribute, info):
     if info != '':
         #print attribute + info
@@ -90,10 +100,11 @@ def checkDate(attribute, info, date):
             pass        
     else:
         pass
+		
+		
 #################################################################################################
 # This is where the ShapeFile will be processed with the data that was collected from the PDFs  #
 #################################################################################################
-import arcpy 
 
 hydrants = arcpy.UpdateCursor('Hydrant_Copy', ["LABEL", "FLOW_DATE", "PITOT_PSI", "PITOT_GPM", "PITOT_GPM", "STATIC_HYD", "RESID_PSI", "ST_HYD_PSI", "Greased", "Painted"])  # path to hydrants to be updated
 
@@ -101,17 +112,37 @@ for hydrant in hydrants:
     if hydrant.LABEL in label_list:
         print hydrant.LABEL
         index = label_list.index(hydrant.LABEL)
+		
+		# The static label should be blank if the field is blank in the pdf, so else needs to pass a ' ' to actually over right the attribute
+        if hydro_list[index][5] != '':
+            shydro_label = hydro_list[index][5]
+            if len(shydro_label) > 10:
+                pass
+            elif len(shydro_label) > 7:
+                hydrant.STATIC_HYD = shydro_label.upper()
+            elif len(shydro_label) == 7:
+                shydro_label = shydro_label.upper() + "-FH"
+                hydrant.STATIC_HYD = shydro_label
+            else:
+                pass
+        else:
+            hydrant.STATIC_HYD = ' '
+        
+		# The residual PSI should be 0 if the field is blank in the pdf
+        if hydro_list[index][6] != '':
+            hydrant.RESID_PSI = hydro_list[index][6]
+        else:
+            hydrant.RESID_PSI = 0
+		
         # print index # to check that the index was correct
         #print "date: " + str(hydrant.FLOW_DATE) + "    PSI: " + str(hydrant.PITOT_PSI) + "    GPM: " + str(hydrant.PITOT_GPM) + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
 		# Defining the hydrant values that will be used to update the shapefile
         checkNULL(hydrant.PITOT_PSI , hydro_list[index][2])
         checkNULL(hydrant.PITOT_GPM , hydro_list[index][3])
         checkNULL(hydrant.PITOT_GPM , hydro_list[index][4])
-        checkNULL(hydrant.STATIC_HYD , hydro_list[index][5])
-        checkNULL(hydrant.RESID_PSI , hydro_list[index][6])
         checkNULL(hydrant.ST_HYD_PSI , hydro_list[index][7])
         
-	# not to update shapefile
+        # not to update shapefile
         #Greased = hydro_list[index][8] 
         #Painted = hydro_list[index][9]
 		
@@ -124,9 +155,10 @@ for hydrant in hydrants:
         #Model = hydro_list[index][10]
         #HGHT = hydro_list[index][11]
         #Manuf_Date = hydro_list[index][12]
+
 		
         #print "date: " + hydrant.FLOW_DATE + "    PSI: " + hydrant.PITOT_PSI + "    GPM: " + hydrant.PITOT_GPM + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
         hydrants.updateRow(hydrant)
     else:
-        continue
+        pass
 del hydrant,hydrants
