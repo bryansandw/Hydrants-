@@ -6,6 +6,7 @@
 # ArcGIS Version: 10.2.2                                                                                                        #
 # Python Version: 2.7                                                                                                           #
 #################################################################################################################################
+import arcpy 
 
 # This is the folder that the hydrant pdfs that were converted to txt are located in
 folder = r'G:\GIS_PROJECTS\WATER_SERVICES\Tess\Hydrants\FakeHydrants'
@@ -54,7 +55,7 @@ for txt in txt_files:
     with open(txt, 'r') as f:
         next(f)
         for str in f:    
-            print str
+            #print str
             out1.write(str)
             list = str.split('\t')
             hydro_list.append(list)
@@ -78,8 +79,7 @@ no_go1.close()
 # This is where the ShapeFile will be processed with the data that was collected from the PDFs  #
 #################################################################################################
 
-import arcpy 
-
+# This is a Class
 hydrants = arcpy.UpdateCursor(hydrant_shp, ["LABEL", "FLOW_DATE", "PITOT_PSI", "PITOT_GPM", "PITOT_GPM", "STATIC_HYD", "RESID_PSI", "ST_HYD_PSI", "Greased", "Painted"])  # path to hydrants to be updated
 
 # iterate through the features in the shapefile looking for hydrants that in the pdfs
@@ -110,25 +110,27 @@ for hydrant in hydrants:
         else:
             pass
         
+		# The static label should be blank if the field is blank in the pdf, so else needs to pass a ' ' to actually over right the attribute
         if hydro_list[index][5] != '':
             shydro_label = hydro_list[index][5]
             if len(shydro_label) > 10:
-                continue
+                pass
             elif len(shydro_label) > 7:
                 hydrant.STATIC_HYD = shydro_label.upper()
             elif len(shydro_label) == 7:
                 shydro_label = shydro_label.upper() + "-FH"
                 hydrant.STATIC_HYD = shydro_label
             else:
-                continue
-            #hydrant.STATIC_HYD = hydro_list[index][5]
+                pass
         else:
-            pass
+            hydrant.STATIC_HYD = ' '
         
+		# The residual PSI should be 0 if the field is blank in the pdf
         if hydro_list[index][6] != '':
             hydrant.RESID_PSI = hydro_list[index][6]
         else:
-            pass
+            hydrant.RESID_PSI = 0
+
         
         if hydro_list[index][7] != '':
             hydrant.ST_HYD_PSI = hydro_list[index][7]
@@ -150,12 +152,12 @@ for hydrant in hydrants:
             pass
 		
         # probably wont use these since they are only for new hydrants... what to do with new... 
-        Model = hydro_list[index][10]
-        HGHT = hydro_list[index][11]
-        Manuf_Date = hydro_list[index][12]
+        #Model = hydro_list[index][10]
+        #HGHT = hydro_list[index][11]
+        #Manuf_Date = hydro_list[index][12]
 
         #print "date: " + hydrant.FLOW_DATE + "    PSI: " + hydrant.PITOT_PSI + "    GPM: " + hydrant.PITOT_GPM + "    Date Greased: " + hydrant.Greased + "    Date Painted: " + hydrant.Painted
         hydrants.updateRow(hydrant)
     else:
-        continue
+        pass
 del hydrant,hydrants
