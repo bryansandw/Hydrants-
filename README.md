@@ -3,10 +3,10 @@ A python script for use in ArcMap to update the hydrant shapefile with data that
 
 The paths are currently hard coded. 
 
-# How to use a script to update the hydrants feature with the data from the hydrant flow forms pdfs. 
+## How to use a script to update the hydrants feature with the data from the hydrant flow forms pdfs. 
 There are two active steps that the user will need to perform, running the javascript in Adobe and the python script in ArcMap.
 
-# Adobe:
+### Adobe:
 To run the JavaScript the user must have Acrobat on their computer.
 The first time the user does this they will need to set the tool up in acrobat:
   1.	In the upper right hand corner of a document click on tools.  This will open a table of contents of the tool types available in Acrobat.  
@@ -27,5 +27,5 @@ this.exportAsText(true, aFields, FileName_str + '.txt');
   10.	The tool will now be accessible under the Action Wizard drop down for you to use.
 For the JavaScript to work there can be no documents of a type other than pdf in the folder.  When the JavaScript finishes running there will txt files with the same names as the pdfs in the hydrant folder that was processed.  
 
-# ArcMap:
+### ArcMap:
 To run the python script you will first need to open the Hydrant mxd. If you do not already have the python window open in ArcMap open it by toggling the python window button.  
